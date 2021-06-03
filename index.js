@@ -3,13 +3,13 @@ const bodyParser = require("body-parser")
 const fs = require('fs')
 const app = express()
 const helmet = require(helmet)
+const limit = require('express-limit').limit;
 app.use(helmet)
 
 app.use(bodyParser.json({limit: '512kb'}))
 
-app.post("/cloudmailin_incoming", (req, res) => {
+app.post("/cloudmailin_incoming", limit({ max: 5, period: 60000 }), (req, res) => {
     let mail = req.body
-    console.log(mail)
 
     let attachments = mail.attachments
     let Nattachments = 0
