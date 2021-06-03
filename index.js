@@ -4,7 +4,7 @@ const fs = require('fs')
 const app = express()
 const helmet = require(helmet)
 const limit = require('express-limit').limit;
-app.use(helmet)
+app.use(helmet())
 
 app.use(bodyParser.json({limit: '512kb'}))
 
