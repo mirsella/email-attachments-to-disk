@@ -1,31 +1,40 @@
-// 1a19a8146c6e99409c66@cloudmailin.net
 const express = require("express")
 const bodyParser = require("body-parser")
 const fs = require('fs')
 const app = express()
+const helmet = require(helmet)
+app.use(helmet)
 
 app.use(bodyParser.json({limit: '512kb'}))
 
 app.post("/cloudmailin_incoming", (req, res) => {
-  let mail = req.body
-  console.log(mail)
+    let mail = req.body
+    console.log(mail)
 
-  let attachments = mail.attachments
-  if (attachments.length === 1) {
-    let data = Buffer.from(attachments[0].content, 'base64')
-    fs.writeFileSync(attachments[0].file_name, data)
-    res.status(200).json({ status: "wrote one file" + attachments[0].file_name })
-  } else if (attachments.length > 1 ) {
+    let attachments = mail.attachments
+    let Nattachments = 0
     for (attachment of attachments) {
-      let data = Buffer.from(attachments[attachment].content, 'base64')
-      fs.writeFileSync(attachment.file_name, data)
-      res.status(200).json({ status: "wrote multiples file" + attachments[0].file_name })
+        if (attachment) {
+            Nattachments += 1
+        }
     }
-  } else {
-    res.status(200).json({ status: "OK, no attachment" })
-  }
+    if (Nattachments === 1) {
+        let data = Buffer.from(attachments[0].content, 'base64')
+        fs.writeFileSync((attachments[0].file_name).replace(/a/g, ''), data)
+        res.status(200).json({ status: "wrote one file" + attachments[0].file_name })
+    } else if (Nattachments > 1 ) {
+        let filesNames = []
+        for (attachment of attachments) {
+            let data = Buffer.from(attachments[attachment].content, 'base64')
+            fs.writeFileSync((attachment.file_name).replace(/a/g, ''), data)
+            filesNames.push(attachment.file_name)
+        }
+        res.status(200).json({ status: "wrote multiples file", files: filesNames })
+    } else {
+        res.status(200).json({ status: "OK, no attachment" })
+    }
 })
 
 app.listen(8888, () => {
-  console.log("server started on :8888")
+    console.log("server started on :8888")
 })
